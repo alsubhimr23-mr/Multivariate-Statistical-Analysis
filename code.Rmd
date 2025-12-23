@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Analysis of Traffic Accidents in Oman "
 author: "Manar AL Subhi"
 date: "2025-12-21"
 output: html_document
@@ -145,6 +145,7 @@ X <- traffic_data[, c("Driver_numbers", "Passengers_numbers", "Pedestrian_number
 
 ggpairs(X, title = "Pairwise Scatterplots of Road-User Variables")
 ```
+
 
 
 

@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Analysis of Traffic Accidents in Oman"
 author: "Manar AL Subhi"
 date: "2025-04-20"
 output:
@@ -533,4 +533,5 @@ In this project, a comprehensive statistical analysis was conducted on traffic a
 The use of Type III ANOVA allowed for precise evaluation of main and interaction effects, while diagnostic plots and summary tables provided insights into the model validity. Notably, the results revealed significant differences in accident outcomes based on gender and indicator type, which could inform safety policies and intervention strategies.
 
 By clearly outlining each algorithm and interpreting results critically, this analysis ensures reproducibility, clarity, and practical relevance. The workflow demonstrated here can be applied to similar datasets in public safety and transportation planning.
+
 

@@ -1,0 +1,536 @@
+---
+title: "Untitled"
+author: "Manar AL Subhi"
+date: "2025-04-20"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# The security and safety: the most notably causes of traffic accidents
+
+### 1. Introduction:
+
+##### Description:
+This data set includes data related to security and safety, most notably traffic accidents cases. The data set contain 2 categorical variables which are the gender(male/female) and Indicators(injuries/deaths), as well as, 4 numerical variables which are the year, number of drivers , number of passenger and number of pedestnion.
+
+I have upload the local data set from National Center For Statistics and Information
+link:  https://gov.om/national-center-for-statistics-and-information
+
+#-------------------------------------------------------------------------------------
+### 2. Importing Data
+###Algorithm:
+- import and read a data from an excel file
+
+###code:
+```{r}
+library(readxl)
+df <- read_excel("C:\\Users\\manar\\Desktop\\STAT3336Poject\\Project_dataset.xlsx")
+head(df)
+```
+#-------------------------------------------------------------------------------------
+### 3. Exploratory Data Analysis
+##### Theory:
+EDA helps uncover patterns, spot anomalies, and check assumptions using summary stats and visualizations.
+
+- 3.1 Summary Statistics:
+##### Algorithm:
+1-Group data by Gender and Indicators
+2-Summarize means and standard deviations for each of numerical variables
+
+##### code:
+```{r}
+library(tidyverse)
+library(dplyr)
+
+df %>%
+  group_by(Gender,Indicators) %>%
+  summarise(year_average=mean(Year),Year_sd=sd(Year),
+            Driver_average = mean(`Driver numbers`),Driver_sd=sd(`Driver numbers`),
+            Passengers_average=mean(`Passengers numbers`),Passengers_sd=sd(`Passengers numbers`),Pedestnion_average=mean(`Pedestnion numbers`),Pedestnion_sd=sd(`Pedestnion numbers`))
+```
+##### Interpretation:
+This codes finds the mean and standard deviation of the 4 numerical variables(year,number of drivers ,number of passenger and number of pedestnion) with respect the 2 categorical variables(Gender,Indicators) as is appears in the table above.
+
+
+- 3.2 Visualizations:
+##### Algorithm:
+Visualize numerical relationships:
+1) using boxplot to construct the following:
+- The relationship of Driver Numbers with Indicators and Gender:
+- The relationship of Passengers Numbers with Indicators and Gender:
+- The relationship of Pedestnion Numbers with Indicators and Gender:
+
+#####code:
+```{r}
+library(ggpubr)
+
+ggboxplot(df,
+          x = "Indicators", y = "Driver numbers",
+          color = "Gender",
+          palette = "jco",
+          add = "jitter",
+          title = "Driver Numbers by Indicators and Gender")
+
+ggboxplot(df,
+          x = "Indicators", y = "Passengers numbers",
+          color = "Gender",
+          palette = "jco",
+          add = "jitter",
+          title = "Passengers Numbers by Indicators and Gender")
+
+ggboxplot(df,
+          x = "Indicators", y = "Pedestnion numbers",
+          color = "Gender",
+          palette = "jco",
+          add = "jitter",
+          title = "Pedestnion Numbers by Indicators and Gender")
+```
+##### Interpretation:
+1.first plot:
+- The boxplot visualizes the number of drivers involved in traffic incidents across two indicator types: Injuries and Deaths, separated by gender. For both indicator types, we can compare how the distribution of driver numbers differs between male and female groups.
+-the Injuries category shows higher driver numbers among males with a wider spread, it may indicate that male drivers are more often involved in severe multi-driver incidents.
+
+2.Second plot:
+- The boxplot visualizes the number of passengers involved in traffic incidents across two indicator types: Injuries and Deaths, separated by gender. For both indicator types, we can compare how the distribution of passengers numbers differs between male and female groups.
+-the Injuries category shows higher passengers numbers among males with a wider spread, it may indicate that male passengers are more often involved in severe multi-driver incidents.
+
+3.Third plot:
+- The boxplot visualizes the number of Pedestnion involved in traffic incidents across two indicator types: Injuries and Deaths, separated by gender. For both indicator types, we can compare how the distribution of Pedestnion numbers differs between male and female groups.
+-the Injuries category shows higher Pedestnion numbers among males with a wider spread, it may indicate that male Pedestnion are more often involved in severe multi-driver incidents.
+
+
+##### Algorithm:
+2) using scatter plot to construct the following:
+- the relationship of Passengers numbers by Indicators through the years
+- the relationship of Driver numbers by Indicators through the years
+- the relationship of Pedestnion numbers by Indicators through the years
+
+####code:
+```{r}
+library(ggpubr)
+
+ggscatter(df,
+          x = "Year", y = "Passengers numbers",
+          color = "Indicators",
+          add = "reg.line",
+          conf.int = TRUE) +
+          labs(title = "Passengers numbers vs Year by Indicators")
+
+ggscatter(df,
+          x = "Year", y = "Driver numbers",
+          color = "Indicators",
+          add = "reg.line",
+          conf.int = TRUE) +
+          labs(title = "Driver numbers vs Year by Indicators")
+
+ggscatter(df,
+          x = "Year", y = "Pedestnion numbers",
+          color = "Indicators",
+          add = "reg.line",
+          conf.int = TRUE) +
+          labs(title = "Pedestnion numbers vs Year by Indicators")
+```
+##### Interpretation:
+1. first plot:
+- The scatter plot illustrates the relationship between Year and the number of passengers involved in traffic incidents, stratified by incident type (Injuries vs Deaths). Regression lines are added for each group to visualize temporal trends.
+- A negative slope in the line for Injuries would indicate that fatal incidents involving drivers have been decreasing.
+-This visualization helps identify whether there's a temporal pattern in passenger involvement and whether it differs between incident severities.
+
+2.second plot:
+- The scatter plot illustrates the trend of driver involvement in traffic incidents over time, categorized by the type of outcome (Injuries or Deaths). For each category, a regression line and confidence interval have been added to show the direction and strength of the trend.
+- A negative slope in the line for Injuries would indicate that fatal incidents involving drivers have been decreasing.
+- The distance between the lines may also show how incident severity differs in terms of the number of drivers involved.
+
+3.third plot
+- The scatter plot visualizes how the number of pedestrians involved in traffic incidents has changed over time, split by outcome severity (Injuries vs Deaths). Each group has its own regression line, showing whether the number is increasing or decreasing with time.
+- If the Injury trend line is flat or falling, fatal pedestrian incidents may be stable or decreasing.
+- The confidence interval (shaded band) indicates the uncertainty in these estimates. Narrower bands suggest more reliable trends.
+#-------------------------------------------------------------------------------------
+### 4. Assumptions and Statistical Framework:
+-fit a linear model for each of (drivers,passengers,pedestnion)
+```{r}
+library(car)
+lm_driver <- lm(`Driver numbers` ~ Gender + Indicators+Year, data = df)
+lm_passenger <- lm(`Passengers numbers` ~ Gender + Indicators+Year, data = df)
+lm_pedestnion <- lm(`Pedestnion numbers` ~ Gender + Indicators+Year, data = df)
+```
+
+##### 1. Normality: Each group’s residuals are normally distributed
+
+###Algorithm:
+- use QQ plot to construct the residuals and look at the points around the line if it is follow straight line
+
+###code:
+```{r}
+qqPlot(lm_driver, main = "QQ Plot of Residuals for drivers")
+qqPlot(lm_passenger, main = "QQ Plot of Residuals for passenger")
+qqPlot(lm_pedestnion, main = "QQ Plot of Residuals for pedestnion")
+```
+###Interpretation:
+In the three qq plots that used the residuals of number of each (drivers,passengers,pedestnion) ,most of the points falls into straight line and few of points considered as an outliers, which indicates a the normality of model.
+
+##### 2. Linearity:Relationship between predictors and outcome is linear.
+##### 3. Homogeneity of Variance:Variances across groups are equal
+
+###Algorithm:
+- use the fittedlinear models and checked residuals by construct a plot of the residuals vs fitted values and see the points if scattered as random or not
+
+###code:
+```{r}
+plot(lm_driver, which = 1)  
+plot(lm_passenger, which = 1)  
+plot(lm_pedestnion, which = 1)  
+```
+###Interpretation:
+These 3 plots shows non-random scatter of residuals points around zero and looks as bow-shaped distribution which indicates Variances across groups are not equal as well as they represent non-linearity model.
+
+##### 4.Independence: Observations are independent:
+###Algorithm:
+- use the fitted linear models and checked residuals by construct a plot of the residuals vs time(year) and see the points if scattered as random or not
+
+###code:
+```{r}
+plot(df$Year, resid(lm_driver), 
+     xlab = "Year", ylab = "Residuals", 
+     main = "Residuals vs Year")
+abline(h = 0, col = "red")
+
+plot(df$Year, resid(lm_passenger), 
+     xlab = "Year", ylab = "Residuals", 
+     main = "Residuals vs Year")
+abline(h = 0, col = "red")
+
+plot(df$Year, resid(lm_pedestnion), 
+     xlab = "Year", ylab = "Residuals", 
+     main = "Residuals vs Year")
+abline(h = 0, col = "red")
+```
+###Interpretation:
+These 3 plots shows random scatter of residuals points around the zero which indicates of independent observations.
+
+##### ANOVA Formula: 
+$$y_{ij}= \mu +\alpha_i +\beta_j + \epsilon_{ij}$$
+$y_{ij}$ : Response variable [Number of (drivers/passengers/pedestnion)] with respect to gender i and indicators j
+
+$\mu$ : overall mean of numbers of(drivers or passengers or pedestnion) through all genders and indicators
+
+$\alpha_i$ : Effect of the i-th level of Gender (Male/Female) on the numbers of (drivers/passengers/pedestnion)
+
+$\beta_j$ : Effect of the j-th level of Indicator (Injuries/Deaths) on the numbers of (drivers/passengers/pedestnion)
+
+$\epsilon_{ij}$ : Random error term which is the difference between the actual numbers of(drivers or passengers or pedestnion) and its expected numbers
+
+```{r}
+anova_model_driver <- aov(lm_driver)
+summary(anova_model_driver)
+```
+From the result of anova found p-value < 0.05 for in the gender,year and indicators which means are significantly affected on the number of drivers.
+
+```{r}
+anova_model_passenger <- aov(lm_passenger)
+summary(anova_model_passenger)
+```
+From the result of anova found :
+p-value < 0.05 for indicators and year
+p-value > 0.05 for gender
+which means that indicators and year are significantly affected on the number of passenger, but the gender is not significantly affected
+
+```{r}
+anova_model_pedestnion <- aov(lm_pedestnion)
+summary(anova_model_pedestnion)
+```
+From the result of anova formula where p-value < 0.05 in the gender,year and indicators which means are significantly affected on the number of pedestnion.
+
+##### Linear Regression Model:
+$$Y = \beta_0 + \beta_1  x_{gender} + \beta_2  x_{indicators} + \beta_3  x_{year} + \epsilon_{ij}$$
+- Y Response variable [Number of (drivers/passengers/pedestnion)] with respect to gender and indicators and year
+- $\beta_0$ : intercept of the linear model
+
+```{r}
+summary(lm_driver)
+```
+ here found the estimated parameter:
+ $ \beta_0 = 219339.15 $ , $ \beta_1 = 1037.58$ , $ \beta_2 = 1241.27$ ,$ \beta_3 =  -109.03 $
+ estimated Drivers number = 219339.15 + 1037.58(GENDER) + 1241.27(indicators) -109.03(year)
+
+
+```{r}
+summary(lm_passenger)
+```
+here found the estimated parameter:
+$ \beta_0 = 247630.61 $ , $ \beta_1 = 319.42 $ , $ \beta_2 =  1175.04 $ ,$ \beta_3 =  -122.91 $
+ estimated Passengers numbers = 247630.61 + 319.42(GENDER) +  1175.04(indicators) -122.91(year)
+
+```{r}
+summary(lm_pedestnion)
+```
+here found the estimated parameter:
+$ \beta_0 = 30244.576 $ , $ \beta_1 = 200.192 $ , $ \beta_2 =  155.038 $ ,$ \beta_3 =  -15.021 $
+ estimated Pedestnion numbers = 30244.576 + 200.192(GENDER) +  155.038(indicators) -15.021(year)
+#----------------------------------------------------------------------------------
+### 5. Test for Normality and Homogeneity:
+##### 1.Test for Normality 
+- Algorithm:
+by using Shapiro-Wilk Test to test if the variable follows normal distribution or not for each group on residuals
+
+- Hypotheses:
+   HO: The residuals are normally distributed in the group.
+   H1: The residuals are not normally distributed.
+   
+-code:
+if interest in the numbers of drivers and want to test the normality on the levels of gender 
+```{r}
+by(residuals(lm_driver), df$Gender, shapiro.test)
+```
+- iterpretation:
+1)since (p-value=0.3781) > (alpha = 0.05) for female
+we fail to reject HO and conclude that normal distribution is satisfied ,so female group residuals are normally distributed
+
+2)since (p-value=0.0004281) < (alpha = 0.05) for male
+we reject HO and conclude that normal distribution is not satisfied , so Male group residuals are not normally distributed
+
+-code:
+if interest in the numbers of passengers and want to test the normality on the levels of indicators 
+```{r}
+by(residuals(lm_passenger), df$Indicators, shapiro.test)
+```
+- iterpretation:
+1)since (p-value=0.7976) > (alpha = 0.05) for Deaths
+we fail to reject HO and conclude that normal distribution is satisfied ,so deaths group residuals are normally distributed
+
+2)since (p-value= 0.01364) < (alpha = 0.05) for Injuries
+we reject HO and conclude that normal distribution is not satisfied , so Injuries group residuals are not normally distributed
+
+##### 2.Test for Homogeneity 
+- Algorithm:
+by using Levene's Test to test variance across different groups which indicates the Homogeneity
+
+- Hypotheses:
+  Ho:The variances are equal across groups.
+  H1:The variances are not equal across groups.
+
+- code:
+```{r}
+library(car)
+test1 <- leveneTest(`Driver numbers` ~ Gender * Indicators, data = df)
+test2 <- leveneTest(`Passengers numbers` ~ Gender * Indicators, data = df)
+test3 <-leveneTest(`Pedestnion numbers` ~ Gender * Indicators, data = df)
+test1
+test2
+test3
+```
+- Interpretation:
+
+Test1: Since (p-value=2.819e-06) < 0.05, so reject Ho and conclude that the Variance of Driver numbers are not equal across different level of both gender and indicators
+
+Test2: Since (p-value=0.0001074) < 0.05, so reject Ho and conclude that the Variances of Passengers numbers are not equal across different level of both gender and indicators.
+
+Test3: Since (p-value=4.792e-08) < 0.05, so reject Ho and conclude that the Variances of Pedestnion numbers are not equal across different level of both gender and indicators.
+
+#-------------------------------------------------------------------------------------
+### 6.Analysis of Variance (ANOVA)
+
+##### 6.1 One-Way ANOVA
+- Algorithm:
+1. Input the data set df: 
+  Response variables: Driver numbers, Passengers numbers, Pedestnion numbers
+  Categorical predictors: Gender and Indicators
+2. Fit a linear model using aov().
+3. Apply summary() or Anova() from car.
+
+-code:
+```{r}
+anova1 <- aov( `Driver numbers` ~ Gender, data = df)
+anova2 <- aov( `Passengers numbers` ~ Gender, data = df)
+anova3 <- aov( `Pedestnion numbers` ~ Gender, data = df)
+
+base::summary(anova1)
+base::summary(anova2)
+base::summary(anova3)
+```
+- Interpretation:
+1) anova1 : Since (p-value=0.00174) < 0.05, so conclude that the gender is significantly affected on the number of drivers.
+2) anova2 : Since (p-value=0.232) > 0.05, so conclude that the gender is not significantly affected on the number of Passengers.
+3) anova3 : Since (p-value=1.3e-05) < 0.05, so conclude that the gender is significantly affected on the number of Pedestnion.
+
+##### 6.2 Two-Way ANOVA with Interaction
+- Algorithm:
+1- Input the data set df: 
+  Response variables: Driver numbers, Passengers numbers, Pedestnion numbers
+  Categorical predictors: Gender and Indicators
+2- Fit a two-way ANOVA model with interaction for each response variable by using aov().
+3- apply Anova() from the car package to perform Type III Sum of Squares ANOVA, which is suitable when interactions are present or when factor levels are unbalanced.
+
+-code:
+```{r}
+anova11 <- aov(`Driver numbers` ~ Gender * Indicators, data = df)
+anova22 <- aov(`Passengers numbers` ~ Gender * Indicators, data = df)
+anova33 <- aov(`Pedestnion numbers` ~ Gender * Indicators, data = df)
+
+Anova(anova11, type = 3)
+Anova(anova22, type = 3)
+Anova(anova33, type = 3)
+```
+- Interpretation:
+1) anova11 : 
+Since (p-value=0.381176) > 0.05 , so indicates gender not significantly affected on driver numbers
+Since (p-value=0.146411 ) > 0.05 , so indicates indicators not significantly affected on driver numbers
+Since (p-value=0.004072 ) < 0.05 so indicates interaction of gender and indicators significantly affected on driver numbers
+
+2) anova22 : 
+Since (p-value=0.735969) > 0.05 for gender, so indicates gender not significantly affected on passenger numbers
+Since (p-value=0.002058) < 0.05 for indicators, so indicates indicators significantly affected on passenger numbers
+Since (p-value=0.293578 ) > 0.05 for interaction  of gender and indicators not significantly affected on passenger numbers
+             
+3) anova33 : 
+Since (p-value=0.01761) < 0.05 for gender, so indicates gender significantly affected on Pedestnion numbers
+Since (p-value=0.13690 ) > 0.05 for indicators, so indicates indicators not significantly affected on Pedestnion numbers
+Since (p-value=0.01787) < 0.05 for interaction  of gender and indicators significantly affected on Pedestnion numbers
+
+##### 6.3 Effect Plot
+- Algorithm:
+1. Install and load the effects package
+2. use ANOVA models anova11, anova22, anova33
+3. Use the allEffects() function to compute the main effects and interaction effects from each ANOVA model.
+4. Plot the results using plot() to showing whether lines for different groups are parallel (no interaction) or non-parallel/crossing (indicating interaction).
+
+-code:
+```{r}
+install.packages("effects")  
+library(effects)
+
+plot(allEffects(anova11), main = "Interaction Effects: Gender * Department")
+plot(allEffects(anova22), main = "Interaction Effects: Gender * Department")
+plot(allEffects(anova33), main = "Interaction Effects: Gender * Department")
+```
+- Interpretation:
+The 3 interaction plots of Gender and Indicators on the 3 cases of Number of (drivers/passengers/pedestnion) reveals whether the effect of Indicators (Injuries/Deaths) differs across levels of Gender. And for each of plots we found the lines are not parallel or cross, this suggests a statistically meaningful interaction between the two variables.
+
+#-------------------------------------------------------------------------------------
+### 7. Linear Regression and Diagnostics
+#####7.1 Fit the Model
+-algoraithim:
+1. Fit a multiple linear regression model for my data set where:
+  Response Variable (Y): Driver numbers
+  Predictors (X): Gender, Indicators, Year, Passengers numbers, Pedestnion numbers
+2. Display the model summary
+-code:
+```{r}
+model1 <- lm(`Driver numbers` ~ Gender + Indicators + Year + `Passengers numbers` + `Pedestnion numbers`, data = df)
+base::summary(model1)
+```
+- Interpretation:
+1. Each coefficient represents the expected change in the number of drivers for a one-unit change in the predictor, holding all other variables constant.
+
+2. GenderMale = 2.193e+02 (p-value = 0.194673 > 0.05): On average, incidents involving male drivers involve  fewer drivers than those involving female drivers, controlling for other variables.
+
+3. IndicatorsInjuries = -2.168e+02 (p-value = 0.220743 > 0.05): Incidents resulting in Injuries are associated with more drivers involved, on average, than those resulting in deaths.
+
+4. Since (Passengers numbers,Pedestnion numbers) has p-value < 0.05 ,so are statistically significant, meaning their effect on Driver numbers is unlikely to be due to chance.However, the remaining predictors has p-value > 0.05 ,so are non-significant variables might not meaningfully contribute to explaining variation in the response.
+
+5. can write the linear model as following:
+estimated Drivers number = -8.145e+04 + 2.193e+02(GENDER) + 1241.27(indicators) -4.029e+01(year)+8.886e-01(passenger)+2.670e+00(Pedestnion)
+
+
+#####7.2 Diagnostic Plots
+- Algorithim:
+1.Set up a multi-panel plotting layout by using par() and display 4 plots in a 2×2 grid.
+2.contrauct the plots by using plot()
+
+-code:
+```{r}
+par(mfrow = c(2, 2))
+plot(model1)
+```
+- Interpretation:
+1.Residuals vs Fitted: checks for non-linearity and unequal variance.
+  from the plot the curve suggests violation of assumptions.
+  
+2.Normal Q-Q: checks if residuals are normally distributed.
+  from the plot Points lie along the straight line so residuals are normally distributed.
+  
+3.Scale-Location (Spread-Location): checks homoscedasticity (equal variance).
+  from the plot the curve suggest heteroscedasticity.
+  
+4.Residuals vs Leverage: identifies influential observations (outliers).
+  from the plot the points outside the red Cook’s distance lines.
+
+
+#####7.3 Multicollinearity (VIF)
+
+-Algoraithim:
+use vif() to detect multicollinearity among predictor variables in the linear model
+
+-code:
+```{r}
+vif(model1)
+```
+-Interpretation:
+1. Each VIF value corresponds to a predictor.
+2. It quantifies how much the variance of a regression coefficient is inflated due to multicollinearity.
+3. Since all VIF values are below 5, indicating no serious multicollinearity among predictors.
+
+#-------------------------------------------------------------------------------------
+### 8. Publication-Ready Output
+##### 8.1 Regression Summary Table:
+-Algoraithim:
+1. install the package getsummary
+2. use the fitted model(model1)
+3. Generate the regression summary table
+
+-code:
+```{r}
+install.packages("gtsummary") 
+library(gtsummary)
+
+tbl_regression(model1, exponentiate = FALSE) %>%
+  bold_labels()
+```
+-Interpretation:
+The output table presents the following for each predictor in the model:
+1. Estimate (Coefficient): Represents the average change in the dependent variable (Driver numbers) for a one-unit change in the predictor, holding other variables constant.
+2. 95% Confidence Interval: Range within which the true coefficient is expected to fall, with 95% confidence.
+3. p-value: Assesses the statistical significance of the predictor.
+
+##### 8.2 ANOVA Summary Table:
+-Algoraithim:
+1. install the package broom
+2. use the fitted anova model(anova11)
+3. Compute Type III ANOVA and convert to tidy format by using tidy() 
+
+-code:
+```{r}
+install.packages("broom")
+library(broom)
+
+tidy(Anova(anova11, type = 3))
+```
+-Interpretation:
+The output will show a table with the following columns:
+1.term: The variable or interaction being tested (Gender, Indicators, Gender:Indicators).
+2.Sum Sq: The sum of squares associated with the term.
+3.Df: Degrees of freedom.
+4.F value: The F-statistic for the hypothesis test.
+5.Pr(>F): The p-value associated with the F-statistic.
+
+A Type III ANOVA was performed to examine the effects of Gender, Indicators (Injuries/Deaths), and their interaction on the number of drivers involved in incidents.The tidy output revealed:
+
+- the main effect of Gender (p-value > 0.05) is not significant, indicating that the average number of drivers differs by gender.
+- the main effect of Indicators (p-value > 0.05) is not significant, suggesting that incidents classified as injuries vs. deaths involve different driver counts.
+- The interaction term (Gender × Indicators) has (p-value < 0.05)was significant, indicating that the combined effect of gender and indicator category does differ significantly beyond their individual effects.
+
+#-------------------------------------------------------------------------------------
+### 9. Conclusion
+
+This document illustrated a complete statistical analysis workflow using the {car} package in R, applied to real-world traffic accident data. The process included clearly defined algorithms for:
+In this project, a comprehensive statistical analysis was conducted on traffic accident data using the {car} package in R. The data included both categorical variables (Gender and Indicators) and numerical variables (Year, Number of Drivers, Number of Passengers, Number of Pedestrians). The analysis followed a structured workflow, including model fitting (ANOVA and regression), assumption testing (Shapiro-Wilk, Levene’s test, residual analysis), multicollinearity assessment (VIF), and visualization of interaction effects.
+
+The use of Type III ANOVA allowed for precise evaluation of main and interaction effects, while diagnostic plots and summary tables provided insights into the model validity. Notably, the results revealed significant differences in accident outcomes based on gender and indicator type, which could inform safety policies and intervention strategies.
+
+By clearly outlining each algorithm and interpreting results critically, this analysis ensures reproducibility, clarity, and practical relevance. The workflow demonstrated here can be applied to similar datasets in public safety and transportation planning.
+

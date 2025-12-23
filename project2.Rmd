@@ -1,0 +1,78 @@
+---
+title: "Untitled"
+author: "Manar AL Subhi"
+date: "2025-05-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readxl)
+df <- read_excel("C:\\Users\\manar\\Desktop\\STAT3336Poject\\Project_dataset.xlsx")
+head(df)
+```
+```{r}
+library(shiny)
+library(car)
+library(ggplot2)
+
+# Load and preprocess data
+traffic_data <- data.frame(df)
+traffic_data 
+```
+```{r}
+# Define UI
+ui <- fluidPage(
+  titlePanel("Traffic Accident Analysis with Linear Regression"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("response", "Response Variable:", 
+                  choices = c("Driver.numbers", "Passengers.numbers", "Pedestnion.numbers")),
+      checkboxGroupInput("predictors", "Predictors:",
+                  choices = c("Year", "Gender", "Indicators")),
+      actionButton("run", "Run Analysis")
+    ),
+    mainPanel(
+      tabsetPanel(
+        tabPanel("Model Summary", verbatimTextOutput("summary")),
+        tabPanel("VIF", tableOutput("vif")),
+        tabPanel("Diagnostics", plotOutput("diagnostics"))
+      )
+    )
+  )
+)
+
+# Define Server
+server <- function(input, output) {
+  model <- eventReactive(input$run, {
+    req(input$predictors)
+    formula <- as.formula(paste(input$response, "~", paste(input$predictors, collapse = "+")))
+    lm(formula, data = traffic_data)
+  })
+
+  output$summary <- renderPrint({
+    summary(model())
+  })
+
+  output$vif <- renderTable({
+    if (length(input$predictors) > 1) {
+      vif_data <- car::vif(model())
+      data.frame(Predictor = names(vif_data), VIF = vif_data)
+    } else {
+      data.frame(Note = "Select at least 2 predictors for VIF.")
+    }
+  })
+
+  output$diagnostics <- renderPlot({
+    par(mfrow = c(2, 2))
+    plot(model())
+  })
+}
+
+# Run App
+shinyApp(ui = ui, server = server)
+```
+

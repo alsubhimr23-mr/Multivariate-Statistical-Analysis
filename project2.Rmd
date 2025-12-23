@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Analysis of Traffic Accidents in Oman- A Shiny-Based Regression Analysis"
 author: "Manar AL Subhi"
 date: "2025-05-08"
 output: html_document
@@ -75,4 +75,5 @@ server <- function(input, output) {
 # Run App
 shinyApp(ui = ui, server = server)
 ```
+
 

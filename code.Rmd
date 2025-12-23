@@ -1,0 +1,150 @@
+---
+title: "Untitled"
+author: "Manar AL Subhi"
+date: "2025-12-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readxl)
+data <- read_excel("C:\\Users\\manar\\Desktop\\Muti Project\\Multi_Project_Dataset.xlsx")
+
+traffic_data <- data.frame(
+  Year = data$Year,
+  Gender = data$Gender ,
+  Indicators = data$Indicators,
+  Driver_numbers = data$`Driver numbers`,
+  Passengers_numbers = data$`Passengers numbers`,
+  Pedestrian_numbers = data$`Pedestnion numbers`
+)
+traffic_data
+```
+```{r}
+# Q-Q plots for multivariate normality check
+par(mfrow=c(1,3))
+qqnorm(traffic_data$Driver_numbers, main="Q-Q Plot: Driver numbers"); qqline(traffic_data$Driver_numbers)
+qqnorm(traffic_data$Passengers_numbers, main="Q-Q Plot: Passenger numbers"); qqline(traffic_data$Passengers_numbers)
+qqnorm(traffic_data$Pedestrian_numbers, main="Q-Q Plot: Pedestrian numbers"); qqline(traffic_data$Pedestrian_numbers)
+par(mfrow=c(1,1))
+```
+
+#1.Multivariate Analysis of Variance (MANOVA)
+```{r}
+manova_model <- manova(
+  cbind(Driver_numbers, Passengers_numbers, Pedestrian_numbers) ~
+    Gender * Indicators,
+  data = traffic_data
+)
+
+summary(manova_model, test = "Wilks")
+```
+
+#2.Box’s M Test for Equality of Covariance Matrices
+```{r}
+library(car)
+install.packages("heplots")   
+library(heplots)
+
+boxM(cbind(Driver_numbers, Passengers_numbers, Pedestrian_numbers) ~
+       Gender, data = traffic_data)
+
+boxM(cbind(Driver_numbers, Passengers_numbers, Pedestrian_numbers) ~
+       Indicators, data = traffic_data)
+
+
+```
+
+#3.Canonical Correlation Analysis (CCA)
+```{r}
+X <- traffic_data[, c("Driver_numbers",
+                      "Passengers_numbers",
+                      "Pedestrian_numbers")]
+
+Y <- model.matrix(~ Gender + Indicators, data = traffic_data)[, -1]
+
+cca_model <- cancor(X, Y)
+cca_model$cor
+
+
+```
+#3.Multivariate Regression
+```{r}
+multi_reg <- manova(
+  cbind(Driver_numbers,
+        Passengers_numbers,
+        Pedestrian_numbers) ~
+    Gender + Indicators + Year,
+  data = traffic_data
+)
+
+summary(multi_reg, test = "Wilks")
+
+```
+
+#4.Principal Component Analysis (PCA)
+```{r}
+pca_model <- prcomp(X, scale. = TRUE)
+
+summary(pca_model)
+
+#Scree plot for PCA
+pca_model <- prcomp(X, scale. = TRUE)
+plot(pca_model, type="lines", main="Scree Plot of PCA Components")
+
+```
+#5.Linear Discriminant Analysis (LDA)
+```{r}
+library(MASS)
+
+lda_model <- lda(
+  Indicators ~ Driver_numbers +
+    Passengers_numbers +
+    Pedestrian_numbers +
+    Gender,
+  data = traffic_data
+)
+
+lda_pred <- predict(lda_model)$class
+table(Predicted = lda_pred, Actual = traffic_data$Indicators)
+
+```
+#6. MANOVA for Time Trends
+```{r}
+rm_model <- manova(
+  cbind(Driver_numbers, Passengers_numbers, Pedestrian_numbers) ~ Year,
+  data = traffic_data)
+
+summary(rm_model, test = "Wilks")
+```
+```{r}
+# 6. Time trends line plot for time MANOVA
+library(reshape2)
+library(ggplot2)
+time_data <- melt(traffic_data, id.vars = c("Year", "Gender", "Indicators"),
+                  measure.vars = c("Driver_numbers", "Passengers_numbers", "Pedestrian_numbers"))
+ggplot(time_data, aes(x=Year, y=value, color=variable)) +
+  geom_line(aes(group=interaction(variable, Gender)), alpha=0.6) +
+  geom_point(aes(shape=Indicators), size=2) +
+  labs(title="Road-User Variables Over Years", y="Count", x="Year") +
+  theme_minimal()
+```
+
+# Pairwise scatterplots for MANOVA / Multivariate Regression
+```{r}
+library(ggplot2)
+library(GGally)
+library(corrplot)
+library(MASS)
+
+# Data
+X <- traffic_data[, c("Driver_numbers", "Passengers_numbers", "Pedestrian_numbers")]
+
+ggpairs(X, title = "Pairwise Scatterplots of Road-User Variables")
+```
+
+
+
